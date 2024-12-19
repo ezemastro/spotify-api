@@ -1,0 +1,19 @@
+{
+  "name": "spotify-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ezemastro/spotify-api.git"
+  },
+  "author": "Ezequiel Mastropietro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ezemastro/spotify-api/issues"
+  },
+  "homepage": "https://github.com/ezemastro/spotify-api#readme",
+  "description": ""
+}
