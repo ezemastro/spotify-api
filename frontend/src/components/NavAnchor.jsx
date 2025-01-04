@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
-export default function NavAnchor({ to, children, type }) {
+export default function NavAnchor ({ to, children, type }) {
   // TODO - type for styling
-  type
+  type = 0
   return (
     <Link to={to}>{children}</Link>
   )

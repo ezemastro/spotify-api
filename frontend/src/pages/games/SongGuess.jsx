@@ -1,6 +1,4 @@
-
-
-export default function SongGuess() {
+export default function SongGuess () {
   return (
     <div>SongGuess</div>
   )

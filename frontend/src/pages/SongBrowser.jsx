@@ -1,4 +1,4 @@
-export default function SongBrowser() {
+export default function SongBrowser () {
   return (
     <div>SongBrowser</div>
   )

@@ -1,11 +1,11 @@
-import { useContext } from "react"
-import { AuthContext } from "../context/auth"
-import LoginButton from "./LoginButton"
-import RegisterButton from "./RegisterButton"
-import UserButton from "./UserButton"
-import LinkSpotifyButton from "./LinkSpotifyButton"
+import { useContext } from 'react'
+import { AuthContext } from '../context/auth'
+import LoginButton from './LoginButton'
+import RegisterButton from './RegisterButton'
+import UserButton from './UserButton'
+import LinkSpotifyButton from './LinkSpotifyButton'
 
-export default function NavSession() {
+export default function NavSession () {
   const { username } = useContext(AuthContext)
 
   return (
@@ -16,14 +16,13 @@ export default function NavSession() {
             <p>{username}</p>
             <UserButton />
           </>
-        )
+          )
         : (
           <>
             <LoginButton />
             <RegisterButton />
           </>
-        )
-      }
+          )}
       <LinkSpotifyButton />
     </div>
   )
