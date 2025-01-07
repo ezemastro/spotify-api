@@ -9,7 +9,7 @@ export default function Nav () {
   const { isSession, isSpotifyLinked } = useAuth()
 
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <nav style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
       <Link to='/'><h1>Guessify</h1></Link>
       {isSession
         ? (
