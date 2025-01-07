@@ -15,6 +15,7 @@ const Layout = () => {
       </header>
       <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1, flexDirection: 'column' }}>
         <Outlet />
+        {/* TODO - overlays */}
       </main>
     </>
   )

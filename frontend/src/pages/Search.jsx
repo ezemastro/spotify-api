@@ -39,7 +39,6 @@ export default function Search () {
   }
 
   const handleChange = (e) => {
-    console.log(e)
     const newUrlParams = new URLSearchParams()
     if (e.target.form.search.value) newUrlParams.append('query', e.target.form.search.value)
     if (e.target.form.type.value !== SPOTIFY_ITEM_TYPES.track) newUrlParams.append('type', e.target.form.type.value)

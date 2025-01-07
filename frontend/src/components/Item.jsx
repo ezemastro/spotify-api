@@ -1,13 +1,19 @@
 import { SPOTIFY_ITEM_TYPES } from '../config'
 import PlayButton from './PlayButton'
 import AddRemoveButton from './AddRemoveButton'
+import { useOverlays } from '../hooks/useOverlays'
 
-export default function Item ({ key, type, name, image, ...props }) {
+export default function Item ({ key, type, name, image, id, ...props }) {
+  const { openLeftOverlay } = useOverlays()
   if (type === SPOTIFY_ITEM_TYPES.track) image = props.album.image
+
+  const handleClick = (e) => {
+    openLeftOverlay({ type, name, image, id })
+  }
 
   return (
     <li key={key}>
-      <button>
+      <button onClick={handleClick}>
         <img src={image?.url} alt={name} />
         <section>
           <h3>{name}</h3>
