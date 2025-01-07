@@ -171,6 +171,13 @@ app.get('/spotify/search', async (req, res) => {
   res.status(200).json(formattedData)
 })
 
+app.post('/spotify/disconnect', async (req, res) => {
+  const user = await User.findById(req.session.id)
+  user.spotify_refresh_token = null
+  user.save()
+  res.status(200).json({ message: 'Spotify account disconnected successfully' })
+})
+
 app.listen(PORT, () => {
   console.log(`Listening on port: http://localhost:${PORT}`)
 })
