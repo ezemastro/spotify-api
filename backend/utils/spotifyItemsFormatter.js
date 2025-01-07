@@ -10,8 +10,7 @@ export const spotifyTrackFormatter = (track, { imgSize } = {}) => {
     explicit: track.explicit,
     id: track.id,
     is_playable: track.is_playable,
-    name: track.name,
-    preview_url: track.preview_url
+    name: track.name
   }
   // is local?
 }
