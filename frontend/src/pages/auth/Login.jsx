@@ -1,5 +1,5 @@
-import { useAuth } from '../hooks/useAuth.js'
-import { backendFetch } from '../utils/fetch.js'
+import { useAuth } from '../../hooks/useAuth.js'
+import { backendFetch } from '../../utils/fetch.js'
 import { useNavigate } from 'react-router-dom'
 
 export default function Login () {

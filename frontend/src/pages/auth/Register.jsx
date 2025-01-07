@@ -1,4 +1,4 @@
-import { backendFetch } from '../utils/fetch.js'
+import { backendFetch } from '../../utils/fetch.js'
 
 export default function Register () {
   const handleRegister = async (e) => {

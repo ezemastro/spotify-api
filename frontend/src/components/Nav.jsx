@@ -3,9 +3,10 @@ import NavAnchor from './NavAnchor'
 import LibraryButton from './LibraryButton'
 import NavUser from './NavUser'
 import { useAuth } from '../hooks/useAuth'
+import LinkSpotifyButton from './LinkSpotifyButton'
 
 export default function Nav () {
-  const { isSession } = useAuth()
+  const { isSession, isSpotifyLinked } = useAuth()
 
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -14,11 +15,19 @@ export default function Nav () {
         ? (
           <>
             <div>
-              <NavAnchor to='/search' type='navigation'>Search</NavAnchor>
-              <NavAnchor to='/games' type='navigation'>Games</NavAnchor>
+              {isSpotifyLinked
+                ? (
+                  <>
+                    <NavAnchor to='/search' type='navigation'>Search</NavAnchor>
+                    <NavAnchor to='/games' type='navigation'>Games</NavAnchor>
+                  </>
+                  )
+                : (
+                  <LinkSpotifyButton />
+                  )}
             </div>
             <div>
-              <LibraryButton />
+              {isSpotifyLinked && <LibraryButton />}
               <NavUser />
             </div>
           </>

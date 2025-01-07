@@ -1,5 +1,5 @@
 export default function NavUser () {
   return (
-    <div>NavUser</div>
+    <button>NavUser</button>
   )
 }

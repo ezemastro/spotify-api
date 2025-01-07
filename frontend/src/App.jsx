@@ -1,9 +1,11 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home.jsx'
-import Login from './pages/Login.jsx'
-import Register from './pages/Register.jsx'
-import Callback from './pages/Callback.jsx'
+import Login from './pages/auth/Login.jsx'
+import Register from './pages/auth/Register.jsx'
+import Callback from './pages/auth/Callback.jsx'
 import Nav from './components/Nav.jsx'
+import Search from './pages/Search.jsx'
+import Games from './pages/Games.jsx'
 
 const Layout = () => {
   return (
@@ -19,38 +21,21 @@ const Layout = () => {
 }
 
 function App () {
-  const router = createBrowserRouter([
-    {
-      path: '/callback',
-      element: <Callback />
-    },
-    {
-      path: '/',
-      element: <Layout />,
-      children: [
-        {
-          path: '/',
-          element: <Home />
-        },
-        {
-          path: '/login',
-          element: <Login />
-        },
-        {
-          path: '/register',
-          element: <Register />
-        },
-        {
-          path: '*',
-          element: <div>404</div>
-        }
-      ]
-    }
-  ])
-
   return (
     <>
-      <RouterProvider router={router} />
+      <BrowserRouter>
+        <Routes>
+          <Route path='/callback' element={<Callback />} />
+          <Route path='/' element={<Layout />}>
+            <Route path='/' element={<Home />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/register' element={<Register />} />
+            <Route path='/search' element={<Search />} />
+            <Route path='/games' element={<Games />} />
+            <Route path='*' element={<div>404</div>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }

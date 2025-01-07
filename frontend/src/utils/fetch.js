@@ -1,7 +1,7 @@
 import { BACKEND_URL } from '../config'
 
-export const backendFetch = async (route, { body, method = 'GET' } = {}) => {
-  const response = await fetch(BACKEND_URL + route, {
+export const backendFetch = async (route, { body, method = 'GET', params } = {}) => {
+  const response = await fetch(BACKEND_URL + route + (params ? `?${params}` : ''), {
     method,
     headers: {
       'Content-Type': 'application/json'

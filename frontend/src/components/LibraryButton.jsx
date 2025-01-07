@@ -1,5 +1,7 @@
+import { backendFetch } from '../utils/fetch.js'
+
 export default function LibraryButton () {
   return (
-    <div>LibraryButton</div>
+    <button onClick={async () => { console.log(await backendFetch('/spotify/debug')) }}>LibraryButton</button>
   )
 }
