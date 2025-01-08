@@ -18,15 +18,14 @@ export default function Search () {
     Object.entries(response.data).forEach(([key, value]) => {
       if (Object.values(SPOTIFY_ITEM_TYPES).includes(key.slice(0, -1))) resItems.push(...value.items)
     })
-
     setDisplayItems(resItems)
   }
 
   useEffect(() => {
+    const query = searchParams.get('query')
     if (!isInitialMount.current) return
-    console.log(searchParams.get('query'))
     isInitialMount.current = false
-    search(searchParams.get('query'), { type: searchParams.get('type') })
+    search(query, { type: searchParams.get('type') ?? 'track' })
   }, [searchParams])
 
   const handleSearch = async (e) => {

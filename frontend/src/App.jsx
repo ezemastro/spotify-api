@@ -6,6 +6,7 @@ import Callback from './pages/auth/Callback.jsx'
 import Nav from './components/Nav.jsx'
 import Search from './pages/Search.jsx'
 import Games from './pages/Games.jsx'
+import SongGuess from './pages/games/SongGuess.jsx'
 
 const Layout = () => {
   return (
@@ -33,6 +34,7 @@ function App () {
             <Route path='/register' element={<Register />} />
             <Route path='/search' element={<Search />} />
             <Route path='/games' element={<Games />} />
+            <Route path='/games/song-guess' element={<SongGuess />} />
             <Route path='*' element={<div>404</div>} />
           </Route>
         </Routes>
