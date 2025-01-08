@@ -5,3 +5,4 @@ export const userSchema = z.object({
   password: z.string().min(3).max(20),
   email: z.string().email()
 })
+export const spotifyIdSchema = z.string().regex(/^[0-9A-Za-z]{22}$/)

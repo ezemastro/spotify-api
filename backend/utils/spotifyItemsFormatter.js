@@ -1,6 +1,6 @@
 const findImage = (images, size) => (images.findLast(image => image.width >= size) ?? images[0]) ?? null
 
-export const spotifyTrackFormatter = (track, { imgSize } = {}) => {
+export const spotifyTrackFormatter = (track, userSaves = [], { imgSize } = {}) => {
   if (!track) return
   return {
     type: track.type,
@@ -10,7 +10,8 @@ export const spotifyTrackFormatter = (track, { imgSize } = {}) => {
     explicit: track.explicit,
     id: track.id,
     is_playable: track.is_playable,
-    name: track.name
+    name: track.name,
+    isSaved: userSaves.contains(track.id)
   }
   // is local?
 }
@@ -27,7 +28,8 @@ export const spotifyAlbumFormatter = (album, { imgSize = 0 } = {}) => {
       url: image?.url,
       size: image?.width
     },
-    artists: album.artists.map(artist => spotifyArtistFormatter(artist))
+    artists: album.artists.map(artist => spotifyArtistFormatter(artist)),
+    album_type: album.album_type
   }
 }
 

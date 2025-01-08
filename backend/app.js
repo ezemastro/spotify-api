@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser'
 import jwt from 'jsonwebtoken'
 import cors from 'cors'
 import { User, connection } from './utils/db.js'
-import { userSchema } from './utils/schemas.js'
+import { spotifyIdSchema, userSchema } from './utils/schemas.js'
 import { hashPassword, comparePassword } from './utils/hash.js'
 import { authMiddleware } from './utils/middleware.js'
 import { CALLBACK_URL, JWT_SECRET, NODE_ENV, PORT, S_CLIENT_ID, S_CLIENT_SECRET, SCOPES, TOKEN_EXPIRATION } from './config.js'
@@ -147,26 +147,35 @@ app.get('/spotify/search', async (req, res) => {
 
   const formattedData = {}
 
-  data.tracks && (formattedData.tracks = {
-    limit: data.tracks.limit,
-    offset: data.tracks.offset,
-    items: data.tracks.items.map(track => spotifyTrackFormatter(track))
-  })
-  data.albums && (formattedData.albums = {
-    limit: data.albums.limit,
-    offset: data.albums.offset,
-    items: data.albums.items.map(album => spotifyAlbumFormatter(album))
-  })
-  data.artists && (formattedData.artists = {
-    limit: data.artists.limit,
-    offset: data.artists.offset,
-    items: data.artists.items.map(artist => spotifyArtistFormatter(artist))
-  })
-  data.playlists && (formattedData.playlists = {
-    limit: data.playlists.limit,
-    offset: data.playlists.offset,
-    items: data.playlists.items.map(playlist => spotifyPlaylistFormatter(playlist))
-  })
+  if (data.tracks) {
+    req.session.user = req.session.user ?? await User.findById(req.session.id)
+    formattedData.tracks = {
+      limit: data.tracks.limit,
+      offset: data.tracks.offset,
+      items: data.tracks.items.map(track => spotifyTrackFormatter(track, req.session.user.saved_songs)).filter(track => track)
+    }
+  }
+  if (data.albums) {
+    formattedData.albums = {
+      limit: data.albums.limit,
+      offset: data.albums.offset,
+      items: data.albums.items.map(album => spotifyAlbumFormatter(album)).filter(album => album)
+    }
+  }
+  if (data.artists) {
+    formattedData.artists = {
+      limit: data.artists.limit,
+      offset: data.artists.offset,
+      items: data.artists.items.map(artist => spotifyArtistFormatter(artist)).filter(artist => artist)
+    }
+  }
+  if (data.playlists) {
+    formattedData.playlists = {
+      limit: data.playlists.limit,
+      offset: data.playlists.offset,
+      items: data.playlists.items.map(playlist => spotifyPlaylistFormatter(playlist)).filter(playlist => playlist)
+    }
+  }
 
   res.status(200).json(formattedData)
 })
@@ -176,6 +185,27 @@ app.post('/spotify/disconnect', async (req, res) => {
   user.spotify_refresh_token = null
   user.save()
   res.status(200).json({ message: 'Spotify account disconnected successfully' })
+})
+
+app.post('/spotify/addremove', async (req, res) => {
+  if (!req.session?.spotifyToken) return res.status(401).json({ error: 'Unauthorized' })
+  req.body.tracks = req.boby.tracks?.filter(track => spotifyIdSchema.safeParse(track).success)
+  if (!req.body.tracks?.lenght > 0) return res.status(400).json({ error: 'Missing tracks' })
+
+  req.session.user ??= await User.findById(req.session.id)
+
+  const addedTracks = req.session.user.saved_songs.addToSet(...req.body.tracks)
+  console.log({ addedTracks })
+  const removeTracks = req.body.tracks.filter(track => !addedTracks.includes(track))
+  console.log({ removeTracks })
+  if (removeTracks.length > 0) req.session.user.saved_songs.pull(...removeTracks)
+
+  await req.session.user.save()
+  res.status(200).json({
+    message: 'Tracks added/removed successfully',
+    added: addedTracks,
+    removed: removeTracks
+  })
 })
 
 app.listen(PORT, () => {

@@ -18,10 +18,12 @@ export const authMiddleware = async (req, res, next) => {
     return next()
   }
 
+  let user
   // Check spotify token expiration
   if (spotifyTokenExpiration && new Date(parseInt(spotifyTokenExpiration)) < new Date()) {
     console.log('Spotify token expired')
-    const { spotify_refresh_token: spotifyRefreshToken } = await User.findById(userId)
+    user = await User.findById(userId)
+    const { spotify_refresh_token: spotifyRefreshToken } = user
 
     const response = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
@@ -48,6 +50,6 @@ export const authMiddleware = async (req, res, next) => {
     }
   }
 
-  req.session = { id: userId, spotifyToken }
+  req.session = { id: userId, spotifyToken, user }
   return next()
 }
