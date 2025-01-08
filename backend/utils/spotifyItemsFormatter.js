@@ -11,7 +11,7 @@ export const spotifyTrackFormatter = (track, userSaves = [], { imgSize } = {}) =
     id: track.id,
     is_playable: track.is_playable,
     name: track.name,
-    isSaved: userSaves.contains(track.id)
+    isSaved: userSaves.includes(track.id)
   }
   // is local?
 }

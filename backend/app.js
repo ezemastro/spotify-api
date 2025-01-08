@@ -60,8 +60,9 @@ app.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid username or password' })
   }
 
+  const isSpotifyLinked = !!user.spotify_refresh_token
   // Posible error si esta vencido
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+  const token = jwt.sign({ userId: user._id, sLinked: isSpotifyLinked }, JWT_SECRET, {
     expiresIn: TOKEN_EXPIRATION,
     noTimestamp: true
   })
@@ -70,13 +71,11 @@ app.post('/login', async (req, res) => {
     httpOnly: true,
     secure: NODE_ENV === 'production',
     maxAge: TOKEN_EXPIRATION
-  }).status(200).json({ message: 'Login successful', username, isSpotifyLinked: user.spotify_refresh_token !== null })
+  }).status(200).json({ message: 'Login successful', username, isSpotifyLinked })
 })
 
 app.post('/spotify/link', async (req, res) => {
-  if (!req.session?.id) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
+  if (!req.session?.id) return res.status(401).json({ error: 'Unauthorized' })
 
   res.json({
     redirect: (
@@ -128,6 +127,10 @@ app.get('/spotify/callback', async (req, res) => {
       maxAge: parseInt(responseData.expires_in) * 1000
     })
     .cookie('spotify_token_expiration', new Date().getTime() + parseInt(responseData.expires_in) * 1000)
+    .cookie('token', jwt.sign({ userId: user._id, sLinked: true }, JWT_SECRET, {
+      expiresIn: TOKEN_EXPIRATION,
+      noTimestamp: true
+    }))
     .status(201).json({ message: 'Account linked to Spotify successfully' })
 })
 
@@ -152,7 +155,7 @@ app.get('/spotify/search', async (req, res) => {
     formattedData.tracks = {
       limit: data.tracks.limit,
       offset: data.tracks.offset,
-      items: data.tracks.items.map(track => spotifyTrackFormatter(track, req.session.user.saved_songs)).filter(track => track)
+      items: data.tracks.items.map(track => spotifyTrackFormatter(track, req.session.user.saved_songs.toObject())).filter(track => track)
     }
   }
   if (data.albums) {
@@ -189,15 +192,14 @@ app.post('/spotify/disconnect', async (req, res) => {
 
 app.post('/spotify/addremove', async (req, res) => {
   if (!req.session?.spotifyToken) return res.status(401).json({ error: 'Unauthorized' })
-  req.body.tracks = req.boby.tracks?.filter(track => spotifyIdSchema.safeParse(track).success)
-  if (!req.body.tracks?.lenght > 0) return res.status(400).json({ error: 'Missing tracks' })
+  if (!req.body?.tracks) return res.status(400).json({ error: 'Missing tracks' })
+  req.body.tracks = req.body.tracks?.filter(track => spotifyIdSchema.safeParse(track).success)
+  if (!req.body.tracks?.length > 0) return res.status(400).json({ error: 'Missing tracks' })
 
   req.session.user ??= await User.findById(req.session.id)
 
   const addedTracks = req.session.user.saved_songs.addToSet(...req.body.tracks)
-  console.log({ addedTracks })
   const removeTracks = req.body.tracks.filter(track => !addedTracks.includes(track))
-  console.log({ removeTracks })
   if (removeTracks.length > 0) req.session.user.saved_songs.pull(...removeTracks)
 
   await req.session.user.save()

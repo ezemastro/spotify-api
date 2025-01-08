@@ -3,8 +3,9 @@ import { JWT_SECRET, NODE_ENV, S_CLIENT_ID, S_CLIENT_SECRET } from '../config.js
 import { User } from './db.js'
 
 export const authMiddleware = async (req, res, next) => {
-  const { token, spotify_token_expiration: spotifyTokenExpiration } = req.cookies
-  let { spotify_token: spotifyToken } = req.cookies
+  // TODO - No basarse en spotify_token_expiration
+  const { token } = req.cookies
+  let { spotify_token: spotifyToken, spotify_token_expiration: spotifyTokenExpiration } = req.cookies
 
   if (!token) {
     req.session = null
@@ -12,15 +13,19 @@ export const authMiddleware = async (req, res, next) => {
   }
 
   // error si esta vencido
-  const { userId } = jwt.verify(token, JWT_SECRET)
+  const { userId, sLinked } = jwt.verify(token, JWT_SECRET)
   if (!userId) {
     req.session = null
+    return next()
+  }
+  if (!sLinked) {
+    req.session = { id: userId }
     return next()
   }
 
   let user
   // Check spotify token expiration
-  if (spotifyTokenExpiration && new Date(parseInt(spotifyTokenExpiration)) < new Date()) {
+  if (sLinked && (new Date(parseInt(spotifyTokenExpiration)) < new Date() || !spotifyToken)) {
     console.log('Spotify token expired')
     user = await User.findById(userId)
     const { spotify_refresh_token: spotifyRefreshToken } = user
@@ -39,8 +44,8 @@ export const authMiddleware = async (req, res, next) => {
 
     // TODO - manejo de error
     if (response.ok) {
-      const { expires_in: expiresIn, ...data } = await response.json()
-      spotifyToken = data.access_token
+      const { expires_in: expiresIn, access_token: accessToken } = await response.json()
+      spotifyToken = accessToken
 
       res.cookie('spotify_token', spotifyToken, {
         httpOnly: true,
