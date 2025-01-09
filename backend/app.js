@@ -198,6 +198,7 @@ app.post('/spotify/addremove', async (req, res) => {
 
   req.session.user ??= await User.findById(req.session.id)
 
+  // TODO - Definir desde el frtonend si son añadidos o eliminados
   const addedTracks = req.session.user.saved_songs.addToSet(...req.body.tracks)
   const removeTracks = req.body.tracks.filter(track => !addedTracks.includes(track))
   if (removeTracks.length > 0) req.session.user.saved_songs.pull(...removeTracks)
@@ -208,6 +209,27 @@ app.post('/spotify/addremove', async (req, res) => {
     added: addedTracks,
     removed: removeTracks
   })
+})
+
+app.get('/spotify/track/:id', async (req, res) => {
+  if (!req.session?.spotifyToken) return res.status(401).json({ error: 'Unauthorized' })
+
+  const { id } = req.params
+  if (!id || !spotifyIdSchema.safeParse(id).success) return res.status(400).json({ error: 'Missing id' })
+
+  const response = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
+    method: 'GET',
+    headers: {
+      Authorization: 'Bearer ' + req.session.spotifyToken
+    }
+  })
+  const data = await response.json()
+
+  const formattedData = {
+    track: spotifyTrackFormatter(data, undefined, { imgSize: 800 })
+  }
+
+  res.status(200).json(formattedData)
 })
 
 app.listen(PORT, () => {
