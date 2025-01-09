@@ -6,7 +6,7 @@ import cors from 'cors'
 import { User, connection } from './utils/db.js'
 import { spotifyIdSchema, userSchema } from './utils/schemas.js'
 import { hashPassword, comparePassword } from './utils/hash.js'
-import { authMiddleware } from './utils/middleware.js'
+import { authMiddleware, spotifyMiddleware } from './utils/middleware.js'
 import { CALLBACK_URL, JWT_SECRET, NODE_ENV, PORT, S_CLIENT_ID, S_CLIENT_SECRET, SCOPES, TOKEN_EXPIRATION } from './config.js'
 import { spotifyAlbumFormatter, spotifyArtistFormatter, spotifyPlaylistFormatter, spotifyTrackFormatter } from './utils/spotifyItemsFormatter.js'
 
@@ -18,7 +18,8 @@ app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }))
-app.use('/spotify', authMiddleware)
+app.use(authMiddleware)
+app.use('/spotify', spotifyMiddleware)
 
 app.post('/register', async (req, res) => {
   const { username, password, email } = req.body
@@ -42,6 +43,7 @@ app.post('/register', async (req, res) => {
   user.save().then(() => {
     res.status(201).json({ message: 'User created successfully' })
   })
+  // TODO - hacer login en registro automaticamente
 })
 
 app.post('/login', async (req, res) => {
@@ -62,7 +64,7 @@ app.post('/login', async (req, res) => {
 
   const isSpotifyLinked = !!user.spotify_refresh_token
   // Posible error si esta vencido
-  const token = jwt.sign({ userId: user._id, sLinked: isSpotifyLinked }, JWT_SECRET, {
+  const token = jwt.sign({ user_id: user._id, is_s_linked: isSpotifyLinked }, JWT_SECRET, {
     expiresIn: TOKEN_EXPIRATION,
     noTimestamp: true
   })
@@ -209,6 +211,16 @@ app.post('/spotify/addremove', async (req, res) => {
     added: addedTracks,
     removed: removeTracks
   })
+})
+
+app.get('/random-track', async (req, res) => {
+  if (!req.session?.id) return res.status(401).json({ error: 'Unauthorized' })
+
+  if (!req.session.user) req.session.user = await User.findById(req.session.id)
+
+  const randomTrack = req.session.user.saved_songs[Math.floor(Math.random() * req.session.user.saved_songs.length)]
+
+  res.status(200).json({ track: { id: randomTrack } })
 })
 
 app.get('/spotify/track/:id', async (req, res) => {
