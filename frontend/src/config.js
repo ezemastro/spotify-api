@@ -6,3 +6,9 @@ export const SPOTIFY_ITEM_TYPES = {
   album: 'album',
   artist: 'artist'
 }
+
+export const GUESS_TYPES = {
+  name: 'name',
+  album: 'album',
+  artist: 'artist'
+}

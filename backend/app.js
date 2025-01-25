@@ -244,6 +244,56 @@ app.get('/spotify/track/:id', async (req, res) => {
   res.status(200).json(formattedData)
 })
 
+app.get('/spotify/token', async (req, res) => {
+  if (!req.session?.spotifyToken) return res.status(401).json({ error: 'Unauthorized' })
+
+  res.status(200).json({ token: req.session.spotifyToken })
+})
+
+app.get('/spotify/player/transfer/:id', async (req, res) => {
+  if (!req.session?.spotifyToken) return res.status(401).json({ error: 'Unauthorized' })
+
+  const { id } = req.params
+  if (!id) return res.status(400).json({ error: 'Missing id' })
+
+  const response = await fetch('https://api.spotify.com/v1/me/player', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + req.session.spotifyToken
+    },
+    body: JSON.stringify({ device_ids: [id], play: true })
+  })
+  if (response.ok) {
+    res.status(200).json({ message: 'Player transfered successfully' })
+  } else {
+    res.status(500).json({ error: 'Error transferring player' })
+  }
+})
+
+app.put('/spotify/player/track/:id', async (req, res) => {
+  if (!req.session?.spotifyToken) return res.status(401).json({ error: 'Unauthorized' })
+
+  const { id } = req.params
+  if (!id) return res.status(400).json({ error: 'Missing id' })
+
+  // + new URLSearchParams({ device_id: req.query.player_id })
+  fetch('https://api.spotify.com/v1/me/player/play', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + req.session.spotifyToken
+    },
+    body: JSON.stringify({
+      uris: ['spotify:track:' + id]
+    })
+  }).then(() => {
+    res.status(200).json({ message: 'Song played successfully' })
+  }).catch(() => {
+    res.status(500).json({ error: 'Error playing song' })
+  })
+})
+
 app.listen(PORT, () => {
   console.log(`Listening on port: http://localhost:${PORT}`)
 })

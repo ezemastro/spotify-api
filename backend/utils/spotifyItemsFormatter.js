@@ -6,7 +6,7 @@ export const spotifyTrackFormatter = (track, userSaves, { imgSize } = {}) => {
     type: track.type,
     album: spotifyAlbumFormatter(track.album, { imgSize }),
     artists: track.artists.map(artist => spotifyArtistFormatter(artist)),
-    duration: Math.floor(track.duration_ms / 1000),
+    duration: track.duration_ms,
     explicit: track.explicit,
     id: track.id,
     is_playable: track.is_playable,

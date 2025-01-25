@@ -18,6 +18,8 @@ export const authMiddleware = async (req, res, next) => {
   }
 
   req.session = { id: userId, isSpotifyLinked, spotifyToken, spotifyTokenExpiration }
+
+  return next()
 }
 export const spotifyMiddleware = async (req, res, next) => {
   if (!req.session?.isSpotifyLinked) return next()
